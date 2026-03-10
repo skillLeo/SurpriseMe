@@ -19,3 +19,13 @@ Route::get('/listen/{token}', [VoiceController::class, 'listen'])->name('voice.l
 Route::get('/share', [ShareController::class, 'index'])->name('share');
 
 Route::get('/gifts', [GiftController::class, 'show'])->name('gift');
+
+
+
+// Replace your old  Route::post('/form', ...)  with these three:
+    Route::get('/form',          [SubmissionController::class, 'index'])  ->name('form');
+    Route::post('/form/preview', [SubmissionController::class, 'preview'])->name('form.preview');
+    Route::post('/form/confirm', [SubmissionController::class, 'confirm'])->name('form.confirm');
+    Route::post('/form/cancel',  [SubmissionController::class, 'cancel']) ->name('form.cancel');
+    
+    // All other routes stay the same

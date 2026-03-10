@@ -25,36 +25,37 @@ class VoiceController extends Controller
 
         $request->validate(['audio' => 'required|file|max:30720']);
 
-        $uploadedFile = $request->file('audio');
-        $uuid         = Str::uuid();
-        $shareToken   = Str::random(40);
+        $file       = $request->file('audio');
+        $shareToken = Str::random(40);
 
-        $rawPath  = storage_path('app/private/voices_raw/' . $uuid . '.webm');
-        $mp3Path  = storage_path('app/public/voices/' . $uuid . '.mp3');
+        // Detect extension from MIME type (webm, ogg, mp4 are all fine for browsers)
+        $mime = $file->getMimeType() ?? 'audio/webm';
+        if (str_contains($mime, 'ogg'))       $ext = 'ogg';
+        elseif (str_contains($mime, 'mp4'))   $ext = 'mp4';
+        elseif (str_contains($mime, 'mpeg'))  $ext = 'mp3';
+        else                                   $ext = 'webm';
 
-        if (!file_exists(storage_path('app/private/voices_raw'))) {
-            mkdir(storage_path('app/private/voices_raw'), 0755, true);
+        $fileName = Str::uuid() . '.' . $ext;
+
+        // Ensure the voices directory exists
+        $dir = storage_path('app/public/voices');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
         }
-        if (!file_exists(storage_path('app/public/voices'))) {
-            mkdir(storage_path('app/public/voices'), 0755, true);
-        }
 
-        $uploadedFile->move(storage_path('app/private/voices_raw'), $uuid . '.webm');
+        // Save directly — no FFmpeg needed, browsers play webm/ogg natively
+        Storage::disk('public')->putFileAs('voices', $file, $fileName);
 
-        $ffmpeg  = $this->findFfmpeg();
-        $cmd     = "{$ffmpeg} -y -i " . escapeshellarg($rawPath) . " -vn -ar 44100 -ac 2 -b:a 128k " . escapeshellarg($mp3Path) . " 2>&1";
-        $output  = shell_exec($cmd);
-
-        @unlink($rawPath);
-
-        if (!file_exists($mp3Path) || filesize($mp3Path) < 1000) {
-            \Log::error('FFmpeg conversion failed: ' . $output);
-            return response()->json(['error' => 'Audio processing failed. FFmpeg output: ' . $output], 500);
+        // Verify file was saved and is not empty
+        if (!Storage::disk('public')->exists('voices/' . $fileName) ||
+            Storage::disk('public')->size('voices/' . $fileName) < 100) {
+            \Log::error('Voice file save failed: ' . $fileName);
+            return response()->json(['error' => 'File save failed'], 500);
         }
 
         VoiceMessage::create([
             'submission_id' => session('submission_id'),
-            'file_name'     => $uuid . '.mp3',
+            'file_name'     => $fileName,
             'share_token'   => $shareToken,
         ]);
 
@@ -68,18 +69,5 @@ class VoiceController extends Controller
         $voice    = VoiceMessage::where('share_token', $token)->firstOrFail();
         $audioUrl = asset('storage/voices/' . $voice->file_name);
         return view('listen', compact('audioUrl'));
-    }
-
-    private function findFfmpeg(): string
-    {
-        $paths = [
-            '/opt/homebrew/bin/ffmpeg',
-            '/usr/local/bin/ffmpeg',
-            '/usr/bin/ffmpeg',
-        ];
-        foreach ($paths as $p) {
-            if (file_exists($p)) return $p;
-        }
-        return 'ffmpeg';
     }
 }
