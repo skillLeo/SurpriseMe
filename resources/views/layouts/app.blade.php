@@ -1,3 +1,4 @@
+{{-- resources/views/layouts/app.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,108 +11,135 @@
     <style>
         * { font-family: 'Poppins', sans-serif; box-sizing: border-box; }
         body { margin: 0; padding: 0; }
+
+        /* ── Background ─────────────────────────────────── */
         .gradient-bg {
-            background: linear-gradient(135deg, #0f0524 0%, #1a0537 40%, #12022e 70%, #200040 100%);
+            background: linear-gradient(160deg, #FDFBFF 0%, #F3EAFF 55%, #FFF0F8 100%);
             min-height: 100vh;
         }
+
+        /* ── Cards ──────────────────────────────────────── */
         .glass {
-            background: rgba(255,255,255,0.07);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: #FFFFFF;
+            border: 1.5px solid #EDE4F6;
+            box-shadow: 0 2px 16px rgba(160, 80, 200, 0.07);
         }
         .glass-strong {
-            background: rgba(255,255,255,0.10);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255,255,255,0.18);
+            background: #FFFFFF;
+            border: 1.5px solid #E6D8F4;
+            box-shadow: 0 4px 28px rgba(160, 80, 200, 0.10);
         }
+
+        /* ── Buttons ────────────────────────────────────── */
         .btn-primary {
-            background: linear-gradient(135deg, #e91e8c, #9333ea);
+            background: linear-gradient(135deg, #E91E8C, #9333EA);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 30px rgba(233,30,140,0.4);
+            box-shadow: 0 4px 24px rgba(233, 30, 140, 0.28);
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 40px rgba(233,30,140,0.6);
+            box-shadow: 0 8px 36px rgba(233, 30, 140, 0.44);
         }
         .btn-whatsapp {
             background: linear-gradient(135deg, #25D366, #128C7E);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(37,211,102,0.3);
+            box-shadow: 0 4px 16px rgba(37, 211, 102, 0.22);
         }
-        .btn-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37,211,102,0.5); }
+        .btn-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37, 211, 102, 0.38); }
         .btn-sms {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.22);
         }
-        .btn-sms:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(59,130,246,0.5); }
+        .btn-sms:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59, 130, 246, 0.38); }
+
+        /* ── Inputs ─────────────────────────────────────── */
         .input-field {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
+            background: #F8F3FD;
+            border: 1.5px solid #E0D0EE;
+            color: #1C1830;
             transition: all 0.3s ease;
         }
         .input-field:focus {
             outline: none;
-            border-color: #e91e8c;
-            background: rgba(255,255,255,0.12);
-            box-shadow: 0 0 0 3px rgba(233,30,140,0.2);
+            border-color: #E91E8C;
+            background: #FEF3FA;
+            box-shadow: 0 0 0 3px rgba(233, 30, 140, 0.10);
         }
-        .input-field::placeholder { color: rgba(255,255,255,0.4); }
-        .step-dot { transition: all 0.3s ease; }
-        .step-dot.active { background: linear-gradient(135deg, #e91e8c, #9333ea); transform: scale(1.2); }
+        .input-field::placeholder { color: #C2B4D6; }
+
+        /* ── Step Dots ──────────────────────────────────── */
+        .step-dot {
+            transition: all 0.3s ease;
+            background: #F4EDF9;
+            border: 1.5px solid #E0D0EE;
+            color: #B8A8CC;
+        }
+        .step-dot.active {
+            background: linear-gradient(135deg, #E91E8C, #9333EA);
+            border-color: transparent;
+            color: #FFFFFF;
+            transform: scale(1.15);
+            box-shadow: 0 4px 18px rgba(233, 30, 140, 0.38);
+        }
+        .step-dot.done {
+            background: linear-gradient(135deg, #E91E8C, #9333EA);
+            border-color: transparent;
+            color: #FFFFFF;
+        }
+
+        /* ── Brand Gradient Text ────────────────────────── */
         .glow-text {
-            background: linear-gradient(135deg, #f472b6, #a855f7, #e91e8c);
+            background: linear-gradient(135deg, #E91E8C, #9333EA);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        /* ── Animations ─────────────────────────────────── */
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            50%       { transform: translateY(-10px); }
         }
         @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(233,30,140,0.4); }
-            50% { box-shadow: 0 0 50px rgba(233,30,140,0.8), 0 0 80px rgba(147,51,234,0.4); }
+            0%, 100% { box-shadow: 0 4px 24px rgba(233, 30, 140, 0.35); }
+            50%       { box-shadow: 0 8px 50px rgba(233, 30, 140, 0.65), 0 0 70px rgba(147, 51, 234, 0.30); }
         }
         @keyframes ripple {
-            0% { transform: scale(1); opacity: 1; }
+            0%   { transform: scale(1); opacity: 1; }
             100% { transform: scale(2.5); opacity: 0; }
         }
-        .float-anim { animation: float 3s ease-in-out infinite; }
-        .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .float-anim  { animation: float 3s ease-in-out infinite; }
+        .pulse-glow  { animation: pulse-glow 2s ease-in-out infinite; }
         .ripple-ring {
-            position: absolute;
-            border-radius: 50%;
-            border: 2px solid rgba(233,30,140,0.6);
+            position: absolute; border-radius: 50%;
+            border: 2px solid rgba(233, 30, 140, 0.35);
             animation: ripple 1.5s ease-out infinite;
         }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
         .fade-in-up { animation: fadeInUp 0.6s ease forwards; }
-        .delay-1 { animation-delay: 0.1s; opacity: 0; }
-        .delay-2 { animation-delay: 0.2s; opacity: 0; }
-        .delay-3 { animation-delay: 0.3s; opacity: 0; }
-        .delay-4 { animation-delay: 0.4s; opacity: 0; }
+        .delay-1 { animation-delay: 0.10s; opacity: 0; }
+        .delay-2 { animation-delay: 0.20s; opacity: 0; }
+        .delay-3 { animation-delay: 0.30s; opacity: 0; }
+        .delay-4 { animation-delay: 0.40s; opacity: 0; }
+
+        /* ── Background Orbs ────────────────────────────── */
         .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.15;
-            pointer-events: none;
-            z-index: 0;
+            position: fixed; border-radius: 50%;
+            filter: blur(90px); opacity: 0.055;
+            pointer-events: none; z-index: 0;
         }
     </style>
     @yield('styles')
 </head>
 <body class="gradient-bg">
-    <div class="orb w-96 h-96 bg-pink-500 top-0 left-0 -translate-x-1/2 -translate-y-1/2"></div>
-    <div class="orb w-80 h-80 bg-purple-600 bottom-0 right-0 translate-x-1/2 translate-y-1/2"></div>
-    <div class="orb w-64 h-64 bg-indigo-500 top-1/2 left-1/2"></div>
+    <div class="orb w-96 h-96 bg-pink-400 top-0 left-0 -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="orb w-80 h-80 bg-purple-500 bottom-0 right-0 translate-x-1/2 translate-y-1/2"></div>
+    <div class="orb w-72 h-72 bg-fuchsia-300 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
 
     <div class="relative z-10">
         @yield('content')
