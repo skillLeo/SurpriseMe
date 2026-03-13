@@ -40,6 +40,15 @@
         </div>
         @endif
 
+        {{-- Same-number warning (shown by JS) --}}
+        <div id="sameNumberWarning" class="hidden rounded-xl p-4 mb-4 flex items-start gap-3 bg-red-50 border border-red-200">
+            <span class="text-red-500 mt-0.5">⚠️</span>
+            <p class="text-red-500 text-xs leading-relaxed font-medium">
+                Your phone number and your friend's phone number cannot be the same.
+                Please enter a different number for your friend.
+            </p>
+        </div>
+
         <form method="POST" action="{{ route('form.store') }}" class="space-y-6 fade-in-up delay-1">
             @csrf
 
@@ -127,7 +136,7 @@
 
             {{-- Submit --}}
             <button type="submit"
-                class="btn-primary w-full text-white font-bold text-base py-4 rounded-xl flex items-center justify-center gap-2"
+                class="btn-primary w-full text-white font-bold text-base py-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-300"
                 id="submitBtn">
                 <span id="btnText">Send Surprise Links 🎁</span>
                 <span id="btnLoader" class="hidden flex items-center gap-2">
@@ -146,10 +155,64 @@
 
 @section('scripts')
 <script>
-document.querySelector('form').addEventListener('submit', function () {
+const userPhone   = document.querySelector('[name="user_phone"]');
+const friendPhone = document.querySelector('[name="friend_phone"]');
+const warning     = document.getElementById('sameNumberWarning');
+const submitBtn   = document.getElementById('submitBtn');
+
+/**
+ * Normalize a phone number for comparison.
+ * Strips all non-digit characters, then returns the last 10 digits.
+ * This correctly treats these as identical:
+ *   +92 311 000 0571  →  3110000571
+ *      0311 000 0571  →  3110000571
+ *       311 000 0571  →  3110000571
+ *   +1 (415) 555-0101 →  4155550101
+ */
+function normalise(v) {
+    const digits = v.replace(/\D/g, '');      // keep digits only
+    return digits.slice(-10);                  // compare last 10 digits
+}
+
+function isSame() {
+    const u = normalise(userPhone.value);
+    const f = normalise(friendPhone.value);
+    // Only flag as same if both have at least 7 digits (avoids false-positives while typing)
+    return u.length >= 7 && f.length >= 7 && u === f;
+}
+
+function setBlocked(blocked) {
+    warning.classList.toggle('hidden', !blocked);
+    submitBtn.disabled = blocked;
+
+    if (blocked) {
+        // Gray out button
+        submitBtn.classList.remove('btn-primary');
+        submitBtn.classList.add('bg-gray-300', 'text-gray-500', 'shadow-none', 'cursor-not-allowed');
+        friendPhone.style.borderColor = '#fca5a5';
+        friendPhone.style.background  = '#fff5f5';
+    } else {
+        // Restore pink-purple gradient
+        submitBtn.classList.add('btn-primary');
+        submitBtn.classList.remove('bg-gray-300', 'text-gray-500', 'shadow-none', 'cursor-not-allowed');
+        friendPhone.style.borderColor = '';
+        friendPhone.style.background  = '';
+    }
+}
+
+userPhone.addEventListener('input',   () => setBlocked(isSame()));
+friendPhone.addEventListener('input', () => setBlocked(isSame()));
+
+document.querySelector('form').addEventListener('submit', function (e) {
+    if (isSame()) {
+        e.preventDefault();
+        setBlocked(true);
+        friendPhone.focus();
+        return;
+    }
     document.getElementById('btnText').classList.add('hidden');
     document.getElementById('btnLoader').classList.remove('hidden');
-    document.getElementById('submitBtn').disabled = true;
+    submitBtn.disabled = true;
 });
 </script>
 @endsection
