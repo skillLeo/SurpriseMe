@@ -2,18 +2,110 @@
 @extends('layouts.app')
 @section('title', 'Spread the Love — SurpriseMe')
 
-@section('content')
-<div class="min-h-screen flex flex-col items-center justify-center px-4 py-16">
-    <div class="w-full max-w-lg">
+@section('styles')
+<style>
+    /* ── Override body bg for share page ────────────── */
+    body.gradient-bg {
+        background: linear-gradient(160deg, #E91E8C 0%, #9333EA 100%) !important;
+    }
 
-        {{-- Step dots --}}
-        <div class="flex justify-center gap-3 mb-10">
+    /* ── Logo bar ───────────────────────────────────── */
+    .share-logo-bar {
+        padding: 1.25rem 1.5rem 0;
+        display: flex; align-items: center; justify-content: space-between;
+        position: relative; z-index: 20;
+    }
+
+    /* ── Background "hero" area ─────────────────────── */
+    .hero-bg {
+        flex: 1;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+    .hero-bg h1 { color: white; font-size: 1.8rem; font-weight: 900; }
+    .hero-bg p  { color: rgba(255,255,255,0.75); font-size: 0.9rem; margin-top: 0.5rem; }
+
+    /* ── Bottom panel (slides up on load) ───────────── */
+    .share-panel {
+        background: #FFFFFF;
+        border-radius: 28px 28px 0 0;
+        box-shadow: 0 -8px 40px rgba(147,51,234,0.20);
+        transform: translateY(100%);
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 85vh;
+        overflow-y: auto;
+        flex-shrink: 0;
+    }
+    .share-panel.revealed { transform: translateY(0); }
+
+    /* Panel handle */
+    .panel-handle {
+        display: flex; flex-direction: column; align-items: center;
+        padding: 1rem 0 0.25rem; gap: 4px;
+    }
+    .panel-handle-bar { width: 44px; height: 5px; border-radius: 3px; background: #E0D0EE; }
+
+    /* Panel inner */
+    .panel-inner { padding: 0.5rem 1.5rem 2.5rem; }
+
+    /* ── Video card ─────────────────────────────────── */
+    .video-card {
+        background: #F8F3FD;
+        border: 1.5px solid #E6D8F4;
+        border-radius: 18px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    .video-card video { width: 100%; display: block; max-height: 220px; object-fit: cover; }
+
+    /* ── Checkbox row ───────────────────────────────── */
+    .check-row {
+        display: flex; align-items: center; gap: 10px;
+        background: #F8F3FD; border: 1.5px solid #E6D8F4;
+        border-radius: 12px; padding: 0.75rem 1rem; margin-bottom: 1.25rem;
+        cursor: pointer;
+    }
+    .check-row input[type="checkbox"] {
+        width: 18px; height: 18px; accent-color: #E91E8C; cursor: pointer; flex-shrink: 0;
+    }
+    .check-row label { color: #6B7280; font-size: 0.82rem; cursor: pointer; line-height: 1.4; }
+
+    /* ── Share buttons ──────────────────────────────── */
+    .share-title { color: #1C1830; font-weight: 700; text-align: center; margin-bottom: 1rem; font-size: 0.95rem; }
+
+    /* ── Congrats pill ──────────────────────────────── */
+    .congrats-pill {
+        background: linear-gradient(135deg, #fff0f8, #f3e8ff);
+        border: 1.5px solid #fce7f3;
+        border-radius: 16px; padding: 1rem 1.25rem;
+        text-align: center; margin-top: 1rem;
+    }
+
+    /* ── Step dots on gradient ──────────────────────── */
+    .step-line-w { width: 24px; height: 2px; background: rgba(255,255,255,0.35); }
+    .step-line-w.done { background: rgba(255,255,255,0.65); }
+
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fadeInUp 0.5s ease forwards; }
+</style>
+@endsection
+
+@section('content')
+<div class="min-h-screen flex flex-col" style="position:relative;">
+
+    {{-- ── Logo + step dots ──────────────────────────── --}}
+    <div class="share-logo-bar">
+        <a href="{{ route('welcome') }}" class="site-logo" style="color:white;">SurpriseMe<span style="color:rgba(255,255,255,0.75)">.com</span></a>
+
+        <div class="flex items-center gap-2">
             @foreach([1,2,3,4] as $step)
-            <div class="flex items-center gap-3">
-                <div class="step-dot w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold
+            <div class="flex items-center gap-2">
+                <div class="step-dot w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
                     {{ $step === 4 ? 'active' : 'done' }}">
                     @if($step < 4)
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                         </svg>
                     @else
@@ -21,44 +113,55 @@
                     @endif
                 </div>
                 @if($step < 4)
-                    <div class="w-8 h-px bg-pink-400/40"></div>
+                    <div class="step-line-w done"></div>
                 @endif
             </div>
             @endforeach
         </div>
+    </div>
 
-        {{-- Heading --}}
-        <div class="text-center mb-8 fade-in-up">
-            <div class="text-5xl mb-4 float-anim">🌊</div>
-            <h2 class="text-3xl md:text-4xl font-extrabold text-[#1C1830] mb-2">Keep the Chain Going!</h2>
-            <p class="text-gray-500 text-sm">
-                You've surprised <strong class="text-pink-600">{{ session('friend_name', 'your friend') }}</strong>.
-                Now share SurpriseMe with others so they can do the same!
-            </p>
+    {{-- ── Background hero text ───────────────────────── --}}
+    <div class="hero-bg fade-in">
+        <div class="text-6xl mb-4" style="animation: float 3s ease-in-out infinite; display:inline-block;">🌊</div>
+        <h1>Let's Keep<br>This Going!</h1>
+        <p>You surprised <strong style="color:white;">{{ session('friend_name', 'your friend') }}</strong>!<br>Now pass it on — share SurpriseMe!</p>
+    </div>
+
+    {{-- ── Bottom slide-up panel ──────────────────────── --}}
+    <div class="share-panel" id="sharePanel">
+
+        {{-- Handle --}}
+        <div class="panel-handle">
+            <div class="panel-handle-bar"></div>
         </div>
 
-        {{-- Promo video embed --}}
-        <div class="glass-strong rounded-2xl overflow-hidden mb-6 fade-in-up delay-1">
-            <div class="aspect-video bg-gray-100 flex items-center justify-center relative">
-                <video class="w-full h-full object-cover" controls poster="">
-                    {{-- <source src="{{ asset('storage/promo.mp4') }}" type="video/mp4"> --}}
+        <div class="panel-inner">
+
+            {{-- Promo video --}}
+            <div class="video-card">
+                <video
+                    id="promoVideo"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    controls
+                >
+                    <source src="{{ asset('assets/promotion.mp4') }}" type="video/mp4">
+                    Your browser does not support the video tag.
                 </video>
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div class="text-center">
-                        <div class="w-16 h-16 rounded-full btn-primary flex items-center justify-center mx-auto mb-3 float-anim">
-                            <svg class="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400 text-xs font-medium">Promo video coming soon</p>
-                    </div>
-                </div>
             </div>
-        </div>
 
-        {{-- Share buttons --}}
-        <div class="glass-strong rounded-2xl p-6 mb-6 fade-in-up delay-2">
-            <p class="text-[#1C1830] font-bold text-center mb-4">Share SurpriseMe with your friends 👇</p>
+            {{-- Checkbox: include video when sharing --}}
+            <div class="check-row" onclick="document.getElementById('includeVideo').click()">
+                <input type="checkbox" id="includeVideo" onclick="event.stopPropagation()">
+                <label for="includeVideo">
+                    Include the promo video link when sharing with friends
+                </label>
+            </div>
+
+            {{-- Share buttons --}}
+            <p class="share-title">Share SurpriseMe with your friends 👇</p>
             <div class="space-y-3">
 
                 <button onclick="shareWhatsApp()"
@@ -86,39 +189,55 @@
                     <span id="copyBtnText">Copy Link</span>
                 </button>
             </div>
-        </div>
 
-        {{-- Congrats card --}}
-        <div class="rounded-2xl p-5 text-center fade-in-up delay-3 bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-100">
-            <p class="text-pink-600 font-bold text-lg mb-1">🎉 You're amazing, {{ session('user_name', 'friend') }}!</p>
-            <p class="text-gray-500 text-sm">
-                Your surprise has been set in motion. Both you and
-                <strong class="text-[#1C1830]">{{ session('friend_name', 'your friend') }}</strong>
-                will receive your gift links shortly.
-            </p>
-        </div>
+            {{-- Congrats --}}
+            <div class="congrats-pill">
+                <p class="text-pink-600 font-bold mb-1">🎉 You're amazing, {{ session('user_name', 'friend') }}!</p>
+                <p class="text-gray-500 text-sm">Your surprise has been set in motion. Both you and <strong class="text-[#1C1830]">{{ session('friend_name', 'your friend') }}</strong> will receive your gift links shortly.</p>
+            </div>
 
-        {{-- Start over --}}
-        <div class="text-center mt-6 fade-in-up delay-4">
-            <a href="{{ route('welcome') }}" class="text-gray-400 hover:text-gray-600 text-sm transition-colors">← Start a new surprise</a>
-        </div>
+            <div class="text-center mt-5">
+                <a href="{{ route('welcome') }}" class="text-gray-400 hover:text-gray-600 text-sm transition-colors">← Start a new surprise</a>
+            </div>
 
+        </div>
     </div>
+
 </div>
 @endsection
 
 @section('scripts')
 <script>
-const shareMessage = encodeURIComponent("Hey! 🎁 I just surprised my best friend with a gift link and a voice note using SurpriseMe! You should do the same for yours → {{ url('/') }}");
+// ── Slide panel up on load ─────────────────────────────────────────────────
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.getElementById('sharePanel').classList.add('revealed');
+    }, 350); // slight delay so user sees the gradient bg first
+});
+
+// ── Float animation for the wave emoji ────────────────────────────────────
+const style = document.createElement('style');
+style.textContent = '@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}';
+document.head.appendChild(style);
+
+// ── Share functions ────────────────────────────────────────────────────────
+const baseUrl    = '{{ url('/') }}';
+const videoUrl   = '{{ asset('assets/promotion.mp4') }}';
+const baseMsg    = "Hey! 🎁 I just surprised my best friend with a gift link and a voice note using SurpriseMe! You should do the same for yours → " + baseUrl;
+
+function getShareMessage() {
+    const includeVid = document.getElementById('includeVideo').checked;
+    return encodeURIComponent(includeVid ? baseMsg + "\n\n🎬 Watch this first: " + baseUrl : baseMsg);
+}
 
 function shareWhatsApp() {
-    window.open(`https://api.whatsapp.com/send?text=${shareMessage}`, '_blank');
+    window.open('https://api.whatsapp.com/send?text=' + getShareMessage(), '_blank');
 }
 function shareSMS() {
-    window.open(`sms:?&body=${shareMessage}`, '_self');
+    window.open('sms:?&body=' + getShareMessage(), '_self');
 }
 function copyLink() {
-    navigator.clipboard.writeText('{{ url('/') }}').then(() => {
+    navigator.clipboard.writeText(baseUrl).then(() => {
         document.getElementById('copyBtnText').textContent = '✓ Copied!';
         setTimeout(() => document.getElementById('copyBtnText').textContent = 'Copy Link', 2500);
     });

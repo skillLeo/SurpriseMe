@@ -12,11 +12,20 @@
         * { font-family: 'Poppins', sans-serif; box-sizing: border-box; }
         body { margin: 0; padding: 0; }
 
-        /* ── Background ─────────────────────────────────── */
         .gradient-bg {
             background: linear-gradient(160deg, #FDFBFF 0%, #F3EAFF 55%, #FFF0F8 100%);
             min-height: 100vh;
         }
+
+        /* ── Logo ───────────────────────────────────────── */
+        .site-logo {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #1C1830;
+            letter-spacing: -0.02em;
+            text-decoration: none;
+        }
+        .site-logo span { color: #E91E8C; }
 
         /* ── Cards ──────────────────────────────────────── */
         .glass {
@@ -68,21 +77,56 @@
         }
         .input-field::placeholder { color: #C2B4D6; }
 
+        /* Glass inputs (for gradient backgrounds) */
+        .input-glass {
+            background: rgba(255,255,255,0.18);
+            border: 1.5px solid rgba(255,255,255,0.35);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        .input-glass:focus {
+            outline: none;
+            background: rgba(255,255,255,0.26);
+            border-color: rgba(255,255,255,0.70);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+        }
+        .input-glass::placeholder { color: rgba(255,255,255,0.55); }
+
         /* ── Step Dots ──────────────────────────────────── */
         .step-dot {
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.25);
+            border: 1.5px solid rgba(255,255,255,0.40);
+            color: rgba(255,255,255,0.70);
+        }
+        .step-dot.active {
+            background: #ffffff;
+            border-color: transparent;
+            color: #E91E8C;
+            transform: scale(1.15);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+        }
+        .step-dot.done {
+            background: rgba(255,255,255,0.35);
+            border-color: rgba(255,255,255,0.50);
+            color: rgba(255,255,255,0.90);
+        }
+
+        /* Light step dots (for white backgrounds) */
+        .step-dot-light {
             transition: all 0.3s ease;
             background: #F4EDF9;
             border: 1.5px solid #E0D0EE;
             color: #B8A8CC;
         }
-        .step-dot.active {
+        .step-dot-light.active {
             background: linear-gradient(135deg, #E91E8C, #9333EA);
             border-color: transparent;
             color: #FFFFFF;
             transform: scale(1.15);
             box-shadow: 0 4px 18px rgba(233, 30, 140, 0.38);
         }
-        .step-dot.done {
+        .step-dot-light.done {
             background: linear-gradient(135deg, #E91E8C, #9333EA);
             border-color: transparent;
             color: #FFFFFF;

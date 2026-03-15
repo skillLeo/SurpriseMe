@@ -4,38 +4,79 @@
 
 @section('styles')
 <style>
-    /* ── Mic button ─────────────────────────────────────── */
+    /* ── Logo bar ───────────────────────────────────── */
+    .voice-logo-bar { padding: 1.25rem 1.5rem 0; display: flex; align-items: center; }
+
+    /* ── Mic button ─────────────────────────────────── */
     .mic-btn {
-        width: 110px; height: 110px; border-radius: 50%;
+        width: 100px; height: 100px; border-radius: 50%;
         background: linear-gradient(135deg, #E91E8C, #9333EA);
         display: flex; align-items: center; justify-content: center;
         cursor: pointer; border: none; outline: none;
         transition: transform 0.3s ease;
         box-shadow: 0 8px 36px rgba(233, 30, 140, 0.38);
+        position: relative; z-index: 2;
     }
     .mic-btn:hover { transform: scale(1.05); }
 
-    /* JS toggles this class on/off */
     @keyframes pulse-glow-mic {
-        0%, 100% { box-shadow: 0 8px 36px rgba(233, 30, 140, 0.40); transform: scale(1); }
-        50%       { box-shadow: 0 8px 56px rgba(233, 30, 140, 0.80); transform: scale(1.04); }
+        0%, 100% { box-shadow: 0 8px 36px rgba(233,30,140,0.45); transform: scale(1); }
+        50%       { box-shadow: 0 8px 60px rgba(233,30,140,0.85); transform: scale(1.05); }
     }
     .mic-btn.recording { animation: pulse-glow-mic 1s ease-in-out infinite; }
 
-    /* ── Waveform ────────────────────────────────────────── */
-    .waveform-bar {
-        width: 4px; border-radius: 4px;
-        background: linear-gradient(to top, #E91E8C, #9333EA);
-        transition: height 0.1s ease;
+    /* ── Waveform container ─────────────────────────── */
+    #waveform {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        height: 80px;
+        position: relative;
+        z-index: 2;
+        transition: height 0.4s ease;
     }
 
-    /* ── Timer ───────────────────────────────────────────── */
+    .waveform-bar {
+        width: 5px; border-radius: 6px;
+        background: linear-gradient(to top, #E91E8C, #9333EA);
+        transition: height 0.1s ease, width 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* ── Waveform recording mode (via :has) ─────────── */
+    /* When mic button is in recording state — change card background and bars */
+    .record-card:has(#micBtn.recording) {
+        background: linear-gradient(160deg, #FFF0F8 0%, #F3E8FF 50%, #FFF0F8 100%);
+        border-color: rgba(233,30,140,0.18);
+    }
+
+    /* Bigger waveform bars during recording */
+    .record-card:has(#micBtn.recording) #waveform {
+        height: 110px;
+        gap: 6px;
+    }
+    .record-card:has(#micBtn.recording) .waveform-bar {
+        width: 7px;
+    }
+
+    /* Gradient orb behind the waveform when recording */
+    .wave-glow {
+        position: absolute;
+        width: 260px; height: 160px;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at center, rgba(233,30,140,0.10) 0%, rgba(147,51,234,0.08) 50%, transparent 70%);
+        top: 50%; left: 50%; transform: translate(-50%, -50%);
+        pointer-events: none; z-index: 1;
+        opacity: 0; transition: opacity 0.4s ease;
+    }
+    .record-card:has(#micBtn.recording) .wave-glow { opacity: 1; }
+
+    /* ── Timer ───────────────────────────────────────── */
     .timer { font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
 
-    /* ── Progress bar ────────────────────────────────────── */
+    /* ── Progress bar ────────────────────────────────── */
     .progress-outer {
-        height: 6px;
-        background: #EDE4F6;
+        height: 6px; background: #EDE4F6;
         border-radius: 6px; cursor: pointer; position: relative;
     }
     .progress-inner {
@@ -44,36 +85,48 @@
         border-radius: 6px; width: 0%; pointer-events: none;
     }
 
-    /* ── Preview play button ─────────────────────────────── */
+    /* ── Preview play button ─────────────────────────── */
     .audio-play-btn {
         width: 44px; height: 44px; border-radius: 50%;
         background: linear-gradient(135deg, #E91E8C, #9333EA);
         border: none; cursor: pointer;
         display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 4px 16px rgba(233, 30, 140, 0.35);
+        box-shadow: 0 4px 16px rgba(233,30,140,0.35);
         flex-shrink: 0; transition: transform 0.2s;
     }
     .audio-play-btn:hover { transform: scale(1.07); }
 
-    /* ── Recording card accent ───────────────────────────── */
+    /* ── Recording card ──────────────────────────────── */
     .record-card {
         background: #FFFFFF;
         border: 1.5px solid #E6D8F4;
-        border-radius: 20px;
-        box-shadow: 0 4px 28px rgba(160, 80, 200, 0.10);
+        border-radius: 24px;
+        box-shadow: 0 4px 28px rgba(160,80,200,0.10);
+        transition: background 0.4s ease, border-color 0.4s ease;
+        overflow: hidden;
     }
+
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+    .delay-1 { animation-delay: 0.10s; opacity: 0; }
 </style>
 @endsection
 
 @section('content')
-<div class="min-h-screen flex flex-col items-center justify-center px-4 py-16">
-    <div class="w-full max-w-lg">
+<div class="min-h-screen flex flex-col items-center justify-start px-4 pb-12">
+
+    {{-- ── Logo bar ───────────────────────────────────── --}}
+    <div class="voice-logo-bar w-full max-w-lg">
+        <a href="{{ route('welcome') }}" class="site-logo">SurpriseMe<span>.com</span></a>
+    </div>
+
+    <div class="w-full max-w-lg mt-6">
 
         {{-- Step dots --}}
-        <div class="flex justify-center gap-3 mb-10">
+        <div class="flex justify-center gap-3 mb-8">
             @foreach([1,2,3,4] as $step)
             <div class="flex items-center gap-3">
-                <div class="step-dot w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold
+                <div class="step-dot-light w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold
                     {{ $step === 3 ? 'active' : ($step < 3 ? 'done' : '') }}">
                     @if($step < 3)
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
@@ -91,7 +144,7 @@
         </div>
 
         {{-- Heading --}}
-        <div class="text-center mb-8 fade-in-up">
+        <div class="text-center mb-6 fade-in-up">
             <h2 class="text-3xl md:text-4xl font-extrabold text-[#1C1830] mb-2">
                 Record for <span class="glow-text">{{ session('friend_name', 'Your Friend') }}</span> 🎤
             </h2>
@@ -99,20 +152,21 @@
         </div>
 
         {{-- Main recording card --}}
-        <div class="record-card p-8 text-center fade-in-up delay-1">
+        <div class="record-card p-7 text-center fade-in-up delay-1">
 
-            {{-- Status text (JS sets style.color on this element) --}}
-            <div id="statusText" class="text-gray-400 text-sm mb-6 h-5">Tap the mic to start recording</div>
+            {{-- Status text (JS sets style.color) --}}
+            <div id="statusText" class="text-gray-400 text-sm mb-5 h-5">Tap the mic to start recording</div>
 
-            {{-- Waveform bars — JS queries '.waveform-bar' --}}
-            <div class="flex justify-center gap-1 items-end h-12 mb-6" id="waveform">
-                @for($i = 0; $i < 24; $i++)
-                <div class="waveform-bar" style="height:10px; opacity:0.25;"></div>
+            {{-- Waveform — JS queries '.waveform-bar' --}}
+            <div id="waveform" class="mb-4 mx-auto" style="max-width:280px; position:relative;">
+                <div class="wave-glow"></div>
+                @for($i = 0; $i < 20; $i++)
+                <div class="waveform-bar" style="height:10px; opacity:0.22;"></div>
                 @endfor
             </div>
 
-            {{-- Mic button — JS uses id="micBtn" and toggles class "recording" --}}
-            <div class="flex justify-center mb-6">
+            {{-- Mic button --}}
+            <div class="flex justify-center mb-5">
                 <button class="mic-btn" id="micBtn">
                     <svg id="micIcon" class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
@@ -125,10 +179,10 @@
             </div>
 
             {{-- Timer --}}
-            <div class="timer text-4xl font-black text-[#1C1830] mb-6" id="timerDisplay">0:00</div>
+            <div class="timer text-4xl font-black text-[#1C1830] mb-5" id="timerDisplay">0:00</div>
 
             {{-- Preview section — JS toggles class "hidden" --}}
-            <div id="previewSection" class="hidden mb-6">
+            <div id="previewSection" class="hidden mb-5">
                 <audio id="audioEl" preload="auto" class="hidden"></audio>
 
                 <div class="rounded-2xl p-4 mb-4 bg-[#F8F3FD] border border-[#E6D8F4]">
@@ -274,7 +328,7 @@ function startWave() {
 }
 function stopWave() {
     clearInterval(waveInterval);
-    waveformBars.forEach(b => { b.style.height = '10px'; b.style.opacity = '0.25'; });
+    waveformBars.forEach(b => { b.style.height = '10px'; b.style.opacity = '0.22'; });
 }
 
 // ─── Recording ─────────────────────────────────────────────────────────────
